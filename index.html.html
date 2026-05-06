@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Team Hoffman — Rep Org Dashboard</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#fff;--bg2:#f7f8fa;--bg3:#eef0f4;
+  --border:#e5e7eb;--border2:#d1d5db;
+  --text:#111827;--text2:#4b5563;--text3:#9ca3af;
+  --purple:#534AB7;--green:#0F6E56;--blue:#185FA5;--orange:#993C1D;
+  --red:#dc2626;--amber:#d97706;--teal:#059669;
+  --r:10px;--rs:6px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg2);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+.topnav{background:var(--bg);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:52px;flex-shrink:0;position:sticky;top:0;z-index:100}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-name{font-size:14px;font-weight:600;color:var(--text)}
+.brand-sep{width:1px;height:16px;background:var(--border2)}
+.brand-sub{font-size:12px;color:var(--text3)}
+.live-chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:500;color:var(--teal);background:#ecfdf5;border:1px solid #a7f3d0;padding:3px 9px;border-radius:20px}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--teal);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.nav-right{display:flex;align-items:center;gap:6px}
+.nav-btn{font-size:12px;font-weight:500;padding:5px 12px;border-radius:var(--rs);border:1px solid var(--border2);background:var(--bg);color:var(--text2);cursor:pointer;transition:.12s}
+.nav-btn:hover{background:var(--bg2)}
+.layout{display:flex;flex:1;overflow:hidden}
+.sidebar{width:200px;flex-shrink:0;background:var(--bg);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:16px 0;overflow-y:auto}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.sidebar-section{padding:0 12px;margin-bottom:20px}
+.sidebar-label{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);padding:0 8px;margin-bottom:6px}
+.sb-btn{display:flex;align-items:center;gap:8px;width:100%;padding:7px 8px;border-radius:var(--rs);border:1px solid transparent;background:transparent;color:var(--text2);font-size:13px;cursor:pointer;text-align:left;transition:.12s;margin-bottom:2px}
+.sb-btn:hover{background:var(--bg2);color:var(--text)}
+.sb-btn.on{background:var(--bg3);color:var(--text);font-weight:500;border-color:var(--border2)}
+.sb-btn svg{width:15px;height:15px;flex-shrink:0;opacity:.6}
+.sb-btn.on svg{opacity:1}
+.abadge{margin-left:auto;background:#fee2e2;color:var(--red);font-size:9.5px;font-weight:600;padding:1px 6px;border-radius:10px}
+.rep-btn{display:flex;align-items:center;gap:8px;width:100%;padding:6px 8px;border-radius:var(--rs);border:1px solid transparent;background:transparent;color:var(--text2);font-size:12.5px;cursor:pointer;text-align:left;transition:.12s;margin-bottom:2px}
+.rep-btn:hover{background:var(--bg2);color:var(--text)}
+.rep-btn.on{background:var(--bg3);color:var(--text);font-weight:500}
+.rdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.content-bar{padding:12px 24px;border-bottom:1px solid var(--border);background:var(--bg);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.content-title{font-size:15px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px}
+.content-meta{font-size:11.5px;color:var(--text3);margin-top:2px}
+.rep-pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:500;padding:2px 9px;border-radius:20px}
+.content-scroll{flex:1;overflow-y:auto;padding:24px}
+.view{display:none;flex-direction:column;gap:18px}
+.view.on{display:flex}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.metrics.three{grid-template-columns:repeat(3,1fr)}
+.mc{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px}
+.mc-label{font-size:11px;font-weight:500;color:var(--text2);margin-bottom:6px}
+.mc-val{font-size:24px;font-weight:600;color:var(--text);line-height:1}
+.mc-sub{font-size:11.5px;color:var(--text3);margin-top:5px}
+.sh{font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.tw{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:12.5px;table-layout:fixed}
+th{background:var(--bg2);padding:8px 14px;text-align:left;font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr.hr{display:none}
+tr:hover td{background:#fafafa}
+.empty-row td{text-align:center;color:var(--text3);padding:22px;font-size:12.5px;font-style:italic}
+.pill{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap}
+.ps{background:#ecfdf5;color:#065f46}
+.pw{background:#fffbeb;color:#92400e}
+.pd{background:#fef2f2;color:#991b1b}
+.pi{background:#eff6ff;color:#1e40af}
+.pg{background:#f3f4f6;color:#374151}
+.pt{background:#f0fdf4;color:#166534}
+.bar-wrap{display:flex;align-items:center;gap:8px}
+.bar-bg{flex:1;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;min-width:40px}
+.bar-fill{height:100%;border-radius:2px}
+.alerts-list{display:flex;flex-direction:column;gap:8px}
+.alert-item{display:flex;gap:12px;align-items:flex-start;padding:13px 16px;background:var(--bg);border:1px solid var(--border);border-left-width:3px;border-radius:0 var(--r) var(--r) 0}
+.alert-item.h{border-left-color:var(--red)}
+.alert-item.m{border-left-color:var(--amber)}
+.adot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.alert-text{font-size:13px;color:var(--text2);line-height:1.6}
+.alert-text strong{color:var(--text);font-weight:600}
+.info-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:13px 16px;font-size:12.5px;color:var(--text2);line-height:1.7}
+.info-box strong{color:var(--text)}
+.no-data{display:none;font-size:13px;color:var(--text3);padding:8px 0;font-style:italic}
+.footer{background:var(--bg);border-top:1px solid var(--border);padding:10px 24px;text-align:center;font-size:11px;color:var(--text3)}
+.eoi-section{margin-bottom:14px}
+.eoi-section-title{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:6px;padding:8px 14px;background:var(--bg2);border-bottom:1px solid var(--border)}
+@media(max-width:768px){.sidebar{display:none}.metrics{grid-template-columns:repeat(2,1fr)}}
+
+.quota-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.quota-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;display:flex;flex-direction:column;gap:12px}
+.quota-card-header{display:flex;align-items:center;justify-content:space-between}
+.quota-rep-name{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--text)}
+.quota-rep-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.quota-attain-pct{font-size:22px;font-weight:700}
+.quota-progress-wrap{width:100%;height:8px;background:var(--bg3);border-radius:4px;overflow:hidden}
+.quota-progress-bar{height:100%;border-radius:4px;transition:width .4s ease}
+.quota-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.quota-stat{background:var(--bg2);border-radius:var(--rs);padding:8px 10px}
+.quota-stat-label{font-size:10px;font-weight:500;color:var(--text3);margin-bottom:3px;letter-spacing:.03em}
+.quota-stat-val{font-size:13px;font-weight:600;color:var(--text)}
+.quota-coverage{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--bg2);border-radius:var(--rs);font-size:12px}
+.quota-coverage-label{color:var(--text2)}
+.quota-coverage-val{font-weight:600;color:var(--text)}
+.quota-placeholder{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text3);padding:8px 10px;background:var(--bg2);border-radius:var(--rs);border:1px dashed var(--border2)}
+.quota-edit-hint{font-size:11px;color:var(--text3);font-style:italic;text-align:center;padding:6px 0}
+.quota-total-bar{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:14px 20px;display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.quota-total-item{display:flex;flex-direction:column;gap:2px}
+.quota-total-label{font-size:10.5px;font-weight:500;color:var(--text3);letter-spacing:.04em;text-transform:uppercase}
+.quota-total-val{font-size:20px;font-weight:700;color:var(--text)}
+.quota-divider{width:1px;height:36px;background:var(--border);flex-shrink:0}
+.badge-ontrack{background:#ecfdf5;color:#065f46;font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:20px}
+.badge-behind{background:#fffbeb;color:#92400e;font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:20px}
+.badge-atrisk{background:#fef2f2;color:#991b1b;font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:20px}
+.badge-pending{background:#f3f4f6;color:#374151;font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:20px}
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="brand">
+    <span class="brand-name">Team Hoffman</span>
+    <span class="brand-sep"></span>
+    <span class="brand-sub">Rep Org Dashboard</span>
+    <span class="live-chip"><span class="live-dot"></span>SF Export · 5/26/2026</span>
+  </div>
+  <div class="nav-right">
+    <button class="nav-btn" onclick="switchView('alerts')">⚑ Alerts <span id="topnav-badge" style="background:#fee2e2;color:#dc2626;font-size:10px;padding:1px 5px;border-radius:10px;margin-left:2px">8</span></button>
+    <button class="nav-btn" onclick="switchView('overview')">⊞ Overview</button>
+  </div>
+</nav>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Views</div>
+      <button class="sb-btn on" data-view="overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Overview</button>
+      <button class="sb-btn" data-view="pipeline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Pipeline</button>
+      <button class="sb-btn" data-view="eoi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Unbilled EOI</button>
+      <button class="sb-btn" data-view="dealprep"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Deal Prep</button>
+      <button class="sb-btn" data-view="ext"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>1st Extensions</button>
+      <button class="sb-btn" data-view="quota"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Quota Tracker</button>
+      <button class="sb-btn" data-view="alerts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Alerts<span class="abadge" id="sb-badge">8</span></button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Filter by rep</div>
+      <button class="rep-btn on" data-rep="all"><span class="rdot" style="background:#9ca3af"></span>All reps</button>
+      <button class="rep-btn" data-rep="cate" data-color="#534AB7"><span class="rdot" style="background:#534AB7"></span>Cate &amp; Carmel</button>
+      <button class="rep-btn" data-rep="cole" data-color="#0F6E56"><span class="rdot" style="background:#0F6E56"></span>Cole &amp; Sarah</button>
+      <button class="rep-btn" data-rep="shannon" data-color="#185FA5"><span class="rdot" style="background:#185FA5"></span>Shannon</button>
+      <button class="rep-btn" data-rep="julia" data-color="#993C1D"><span class="rdot" style="background:#993C1D"></span>Julia</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="content-bar">
+      <div>
+        <div class="content-title"><span id="ptitle">Team overview</span><span class="rep-pill" id="rep-pill" style="display:none"></span></div>
+        <div class="content-meta" id="pmeta">All reps · Salesforce export 5/26/2026</div>
+      </div>
+    </div>
+    <!-- DYNAMIC REP SUMMARY STRIP -->
+    <div id="rep-summary-strip" style="display:none;padding:10px 24px;background:#fffbeb;border-bottom:1px solid #fde68a;flex-shrink:0;gap:16px;align-items:center;flex-wrap:wrap">
+      <span style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#92400e">Filtered:</span>
+      <span id="strip-rep" style="font-size:13px;font-weight:600;color:#111827"></span>
+      <span style="color:#d1d5db">|</span>
+      <span style="font-size:12px;color:#4b5563">Pipeline: <strong id="strip-pipeline" style="color:#111827"></strong></span>
+      <span style="color:#d1d5db">|</span>
+      <span style="font-size:12px;color:#4b5563">Unbilled EOI: <strong id="strip-eoi" style="color:#d97706"></strong></span>
+      <span style="color:#d1d5db">|</span>
+      <span style="font-size:12px;color:#4b5563">Deals: <strong id="strip-deals" style="color:#111827"></strong></span>
+      <span style="color:#d1d5db">|</span>
+      <span style="font-size:12px;color:#4b5563">1st Extensions: <strong id="strip-ext" style="color:#111827"></strong></span>
+    </div>
+    <div class="content-scroll">
+
+      <!-- OVERVIEW -->
+      <div class="view on" id="view-overview">
+        <div class="metrics">
+          <div class="mc"><div class="mc-label">Total pipeline</div><div class="mc-val">$1.27M</div><div class="mc-sub">97 active deals · 4 reps</div></div>
+          <div class="mc"><div class="mc-label">Closing ≤ 30 days</div><div class="mc-val" style="color:var(--red)">40</div><div class="mc-sub">deals with May close dates</div></div>
+          <div class="mc"><div class="mc-label">Total unbilled EOI</div><div class="mc-val" style="color:var(--amber)">$1.28M</div><div class="mc-sub">4 reps · 115 line items</div></div>
+          <div class="mc"><div class="mc-label">1st extensions</div><div class="mc-val">59</div><div class="mc-sub">across the team</div></div>
+        </div>
+        <div>
+          <div class="sh">Rep summary</div>
+          <div class="tw">
+            <table>
+              <colgroup><col style="width:18%"><col style="width:11%"><col style="width:9%"><col style="width:9%"><col style="width:13%"><col style="width:9%"><col style="width:31%"></colgroup>
+              <thead><tr><th>Rep</th><th>Pipeline</th><th>Deals</th><th>≤ 30d</th><th>Unbilled EOI</th><th>Exts</th><th>Top flag</th></tr></thead>
+              <tbody id="ov-table">
+                <tr data-rep="cate"><td><span style="display:inline-flex;align-items:center;gap:7px"><span style="width:8px;height:8px;border-radius:50%;background:#534AB7;display:inline-block;flex-shrink:0"></span><strong>Cate &amp; Carmel</strong></span></td><td>$631K</td><td>37</td><td>7</td><td style="color:var(--amber);font-weight:600">$454K</td><td>22</td><td style="color:var(--text2);font-size:12px">MS Michelin dup · $80K</td></tr>
+                <tr data-rep="cole"><td><span style="display:inline-flex;align-items:center;gap:7px"><span style="width:8px;height:8px;border-radius:50%;background:#0F6E56;display:inline-block;flex-shrink:0"></span><strong>Cole &amp; Sarah</strong></span></td><td>$337K</td><td>25</td><td>7</td><td style="color:var(--amber);font-weight:600">$556K</td><td>27</td><td style="color:var(--text2);font-size:12px">$556K EOI + Emerald $72K due 5/31</td></tr>
+                <tr data-rep="shannon"><td><span style="display:inline-flex;align-items:center;gap:7px"><span style="width:8px;height:8px;border-radius:50%;background:#185FA5;display:inline-block;flex-shrink:0"></span><strong>Shannon</strong></span></td><td>$176K</td><td>20</td><td style="color:var(--red);font-weight:600">16</td><td style="color:var(--amber);font-weight:600">$28K</td><td>7</td><td style="color:var(--text2);font-size:12px">16 deals with May close dates</td></tr>
+                <tr data-rep="julia"><td><span style="display:inline-flex;align-items:center;gap:7px"><span style="width:8px;height:8px;border-radius:50%;background:#993C1D;display:inline-block;flex-shrink:0"></span><strong>Julia</strong></span></td><td>$129K</td><td>15</td><td>10</td><td style="color:var(--amber);font-weight:600">$239K</td><td>3</td><td style="color:var(--text2);font-size:12px">$126K A&amp;M Project Rise EOI</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <div class="sh">High-priority flags</div>
+          <div class="alerts-list" id="ov-flags">
+            <div class="alert-item h" data-rep="cole"><span class="adot" style="background:var(--red)"></span><div class="alert-text"><strong>Sarah — $556K total unbilled EOI.</strong> Largest EOI book on the team across 33 deals. Top item: Barclays Project Prompt ($195K), end Aug 27, 2026.</div></div>
+            <div class="alert-item h" data-rep="cate"><span class="adot" style="background:var(--red)"></span><div class="alert-text"><strong>Cate — $454K total unbilled EOI.</strong> 39 line items. Largest: BofA M&A Project Ignite ($155K) and BofA FIG Project CAP ($62K).</div></div>
+            <div class="alert-item h" data-rep="julia"><span class="adot" style="background:var(--red)"></span><div class="alert-text"><strong>Julia — $239K total unbilled EOI.</strong> Largest: A&amp;M RX Project Rise ($126K) and Vestra Project Union ($34K).</div></div>
+            <div class="alert-item h" data-rep="shannon"><span class="adot" style="background:var(--red)"></span><div class="alert-text"><strong>Shannon — 16 deals with May close dates.</strong> Two largest on hold: Cantor Canon ($40K) and Berkshire Lodestar ($39K).</div></div>
+            <div class="alert-item h" data-rep="cole"><span class="adot" style="background:var(--red)"></span><div class="alert-text"><strong>Sarah — Barclays Emerald · $72K · closes 5/31.</strong> No SF update in 7 days. Last logged: 4/29.</div></div>
+            <div class="no-data" id="ov-no-flag">No high-priority flags for this rep.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PIPELINE -->
+      <div class="view" id="view-pipeline">
+        <div class="metrics" id="pl-metrics" style="display:none">
+          <div class="mc"><div class="mc-label">Pipeline total</div><div class="mc-val" id="pl-total" style="color:#0F6E56">—</div><div class="mc-sub" id="pl-deals-sub">filtered deals</div></div>
+          <div class="mc"><div class="mc-label">Closing ≤ 30 days</div><div class="mc-val" id="pl-close" style="color:var(--red)">—</div><div class="mc-sub">with May close dates</div></div>
+          <div class="mc"><div class="mc-label">At risk / on hold</div><div class="mc-val" id="pl-risk" style="color:var(--red)">—</div><div class="mc-sub">flagged deals</div></div>
+          <div class="mc"><div class="mc-label">Avg deal size</div><div class="mc-val" id="pl-avg">—</div><div class="mc-sub">for this rep</div></div>
+        </div>
+        <div class="tw">
+          <table>
+            <colgroup><col style="width:12%"><col style="width:14%"><col style="width:26%"><col style="width:14%"><col style="width:10%"><col style="width:9%"><col style="width:15%"></colgroup>
+            <thead><tr><th>Rep</th><th>Account</th><th>Deal</th><th>Stage</th><th>Amount</th><th>Close</th><th>Status</th></tr></thead>
+            <tbody id="pl-body">
+              <tr data-rep="cole"><td style="color:#0F6E56;font-weight:600">Cole/Sarah</td><td><strong>Barclays</strong></td><td>Project Emerald DC VDR</td><td><span class="pill pw">Propose</span></td><td style="font-weight:600">$72,000</td><td style="color:var(--red)">5/31</td><td><span class="pill pd">At Risk</span></td></tr>
+              <tr data-rep="cole"><td style="color:#0F6E56;font-weight:600">Cole/Sarah</td><td><strong>Citigroup</strong></td><td>Project Trident MOE VDR</td><td><span class="pill pw">Propose</span></td><td style="font-weight:600">$50,000</td><td style="color:var(--red)">5/31</td><td><span class="pill pd">At Risk</span></td></tr>
+              <tr data-rep="cate"><td style="color:#534AB7;font-weight:600">Cate</td><td><strong>Morgan Stanley</strong></td><td>MS FIG Project Core DCAI</td><td><span class="pill pw">Propose</span></td><td style="font-weight:600">$43,000</td><td>6/23</td><td><span class="pill pg">Active</span></td></tr>
+              <tr data-rep="cate"><td style="color:#534AB7;font-weight:600">Cate/Carmel</td><td><strong>Morgan Stanley</strong></td><td>MS GPUG Project Beacon</td><td><span class="pill pw">Propose</span></td><td style="font-weight:600">$41,000</td><td style="color:var(--red)">5/31</td><td><span class="pill pd">At Risk</span></td></tr>
+              <tr data-rep="cate"><td style="color:#534AB7;font-weight:600">Cate</td><td><strong>Morgan Stanley</strong></td><td>MS M&amp;A Michelin VDR</td><td><span class="pill ps">Neg &amp; Close</span></td><td style="font-weight:600">$40,000</td><td>6/30</td><td><span class="pill pw">Dup Opp</span></td></tr>
+              <tr data-rep="cate"><td style="color:#534AB7;font-weight:600">Cate</td><td><strong>Morgan Stanley</strong></td><td>MS M&amp;A Michelin DC</td><td><span class="pill ps">Neg &amp; Close</span></td><td style="font-weight:600">$40,000</td><td>6/30</td><td><span class="pill pw">Dup Opp</span></td></tr>
+              <tr data-rep="cate"><td style="color:#534AB7;font-weight:600">Cate</td><td><strong>Morgan Stanley</strong></td><td>MS M&amp;A Project Monroe VDR</td><td><span class="pill pi">Discover</span></td><td style="font-weight:600">$40,000</td><td>7/31</td><td><span class="pill pg">Active</span></td></tr>
+              <tr data-rep="shannon"><td style="color:#185FA5;font-weight:600">Shannon</td><td><strong>Cantor Fitz</strong></td><td>Project Canon DCAI</td><td><span class="pill pw">Propose</span></td><td style="font-weight:600">$40,000</td><td style="color:var(--red)">5/30</td><td><span class="pill pd">On Hold</span></td></tr>
+              <tr data-rep="shannon"><td style="color:#185FA5;font-weight:600">Shannon</td><td><strong>Berkshire Glbl</strong></td><td>Project Lodestar</td><td><span class="pill ps">Neg &amp; Close</span></td><td style="font-weight:600">$39,000</td><td>8/31</td><td><span class="pill pd">On Hold</span></td></tr>
+              <tr data-rep="cate"><td style="color:#534AB7;font-weight:600">Carmel</td><td><strong>BofA</strong></td><td>BofA M&amp;A Project Workout</td><td><span class="pill pw">Propose</span></td><td style="font-weight:600">$33,250</td><td>9/30</td><td><span class="pill pg">Active</span></td></tr>
+              <tr data-rep="julia"><td style="color:#993C1D;font-weight:600">Julia</td><td><strong>DC Advisory</strong></td><td>Project Apple Sidecar</td><td><span class="pill pt">Contract Signed</span></td><td style="font-weight:600">$28,000</td><td style="color:var(--red)">5/31</td><td><span class="pill pw">Pending Close</span></td></tr>
+              <tr data-rep="cole"><td style="color:#0F6E56;font-weight:600">Cole/Sarah</td><td><strong>Citigroup</strong></td><td>Project Bright Sellside VDR</td><td><span class="pill ps">Neg &amp; Close</span></td><td style="font-weight:600">$25,000</td><td>6/30</td><td><span class="pill pd">On Hold</span></td></tr>
+              <tr data-rep="cole"><td style="color:#0F6E56;font-weight:600">Cole/Sarah</td><td><strong>Wells Fargo</strong></td><td>Project Cowboy VDR</td><td><span class="pill pi">Discover</span></td><td style="font-weight:600">$25,000</td><td>7/31</td><td><span class="pill pg">Active</span></td></tr>
+              <tr data-rep="julia"><td style="color:#993C1D;font-weight:600">Julia</td><td><strong>Stephens</strong></td><td>FIG Project Lion</td><td><span class="pill ps">Neg &amp; Close</span></td><td style="font-weight:600">$19,500</td><td>6/26</td><td><span class="pill pg">Active</span></td></tr>
+              <tr data-rep="cate"><td style="color:#534AB7;font-weight:600">Cate</td><td><strong>BofA</strong></td><td>BofA EGRC Project Meteor</td><td><span class="pill ps">Neg &amp; Close</span></td><td style="font-weight:600">$15,000</td><td>6/30</td><td><span class="pill pg">Active</span></td></tr>
+              <tr data-rep="julia"><td style="color:#993C1D;font-weight:600">Julia</td><td><strong>DC Advisory</strong></td><td>Project Long Beach</td><td><span class="pill pt">Contract Signed</span></td><td style="font-weight:600">$10,500</td><td style="color:var(--red)">5/31</td><td><span class="pill pw">Pending Close</span></td></tr>
+              <tr data-rep="julia"><td style="color:#993C1D;font-weight:600">Julia</td><td><strong>DC Advisory</strong></td><td>HC Project Skylark</td><td><span class="pill pt">Contract Signed</span></td><td style="font-weight:600">$8,800</td><td style="color:var(--red)">5/31</td><td><span class="pill pw">Pending Close</span></td></tr>
+              <tr class="empty-row" style="display:none"><td colspan="7">No pipeline data for selected rep</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- EOI -->
+      <div class="view" id="view-eoi">
+        <!-- ALL REPS EOI METRICS (shown when all selected) -->
+        <div class="metrics" id="eoi-all-metrics">
+          <div class="mc"><div class="mc-label">Sarah — unbilled EOI</div><div class="mc-val" style="color:var(--amber)">$556K</div><div class="mc-sub">33 deals · Barclays &amp; Citi</div></div>
+          <div class="mc"><div class="mc-label">Cate — unbilled EOI</div><div class="mc-val" style="color:var(--amber)">$454K</div><div class="mc-sub">39 deals · BofA &amp; MS</div></div>
+          <div class="mc"><div class="mc-label">Julia — unbilled EOI</div><div class="mc-val" style="color:var(--amber)">$239K</div><div class="mc-sub">17 deals · A&amp;M &amp; Vestra</div></div>
+          <div class="mc"><div class="mc-label">Shannon — unbilled EOI</div><div class="mc-val" style="color:var(--amber)">$28K</div><div class="mc-sub">26 deals · Davis Polk &amp; Berkshire</div></div>
+        </div>
+        <!-- SINGLE REP EOI METRICS (shown when one rep selected) -->
+        <div class="metrics three" id="eoi-rep-metrics" style="display:none">
+          <div class="mc"><div class="mc-label" id="eoi-rep-label">Rep — unbilled EOI</div><div class="mc-val" id="eoi-rep-total" style="color:var(--amber)">—</div><div class="mc-sub" id="eoi-rep-sub">deals</div></div>
+          <div class="mc"><div class="mc-label">Extension amount</div><div class="mc-val" id="eoi-ext-total" style="color:var(--amber)">—</div><div class="mc-sub">extension type</div></div>
+          <div class="mc"><div class="mc-label">Incremental amount</div><div class="mc-val" id="eoi-incr-total" style="color:var(--amber)">—</div><div class="mc-sub">incremental type</div></div>
+        </div>
+
+        <!-- SARAH EOI -->
+        <div>
+          <div class="sh">Sarah Hoffman — top unbilled EOI deals</div>
+          <div class="tw">
+            <table>
+              <colgroup><col style="width:22%"><col style="width:44%"><col style="width:12%"><col style="width:11%"><col style="width:11%"></colgroup>
+              <thead><tr><th>Account</th><th>Deal</th><th>Amount</th><th>Type</th><th>End Date</th></tr></thead>
+              <tbody id="eoi-sarah">
+                <tr data-rep="cole"><td><strong>Barclays Capital</strong></td><td>Barclays Capital — HC — Project Prompt VDR</td><td style="font-weight:600;color:var(--amber)">$195,197</td><td><span class="pill pw">Extension</span></td><td style="color:var(--text3);font-size:11.5px">Aug 27 '26</td></tr>
+                <tr data-rep="cole"><td><strong>Barclays Capital</strong></td><td>Barclays — TMT — Project Starburst VDR</td><td style="font-weight:600;color:var(--amber)">$87,074</td><td><span class="pill pw">Extension</span></td><td style="color:var(--text3);font-size:11.5px">Apr 7 '26</td></tr>
+                <tr data-rep="cole"><td><strong>Barclays Capital</strong></td><td>Barclays — Power — Project Zephyr VDR</td><td style="font-weight:600;color:var(--amber)">$43,553</td><td><span class="pill pg">Incremental</span></td><td style="color:var(--text3);font-size:11.5px">May 10 '26</td></tr>
+                <tr data-rep="cole"><td><strong>Barclays Capital</strong></td><td>Barclays — TMT — Project Starburst (Incr.)</td><td style="font-weight:600;color:var(--amber)">$37,706</td><td><span class="pill pg">Incremental</span></td><td style="color:var(--text3);font-size:11.5px">Apr 7 '26</td></tr>
+                <tr data-rep="cole"><td><strong>Citigroup</strong></td><td>Citigroup — M&amp;A — Project Longhorn VDR</td><td style="font-weight:600;color:var(--amber)">$29,388</td><td><span class="pill pw">Extension</span></td><td style="color:var(--text3);font-size:11.5px">Apr 28 '26</td></tr>
+                <tr data-rep="cole"><td><strong>Barclays Capital</strong></td><td>Barclays — M&amp;A — Project Chimera VDR</td><td style="font-weight:600;color:var(--amber)">$22,971</td><td><span class="pill pw">Extension</span></td><td style="color:var(--text3);font-size:11.5px">Nov 17 '25</td></tr>
+                <tr data-rep="cole"><td><strong>Citigroup</strong></td><td>Citigroup — FIG — Project Senna Sellside VDR</td><td style="font-weight:600;color:var(--amber)">$22,721</td><td><span class="pill pw">Extension</span></td><td style="color:var(--text3);font-size:11.5px">Aug 4 '26</td></tr>
+                <tr data-rep="cole"><td><strong>Citigroup</strong></td><td>Citigroup — M&amp;A — Project Takeoff VDR</td><td style="font-weight:600;color:var(--amber)">$19,200</td><td><span class="pill pw">Extension</span></td><td style="color:var(--text3);font-size:11.5px">Dec 9 '25</td></tr>
+                <tr data-rep="cole"><td><strong>Wells Fargo</strong></td><td>WF — M&amp;A — Project Redwood Sellside VDR</td><td style="font-weight:600;color:var(--amber)">$18,183</td><td><span class="pill pw">Extension</span></td><td style="color:var(--text3);font-size:11.5px">Nov 27 '25</td></tr>
+                <tr data-rep="cole"><td><strong>Barclays Capital</strong></td><td>Barclays — E&amp;CT — Project Firebolt VDR</td><td style="font-weight:600;color:var(--amber)">$15,600</td><td><span class="pill pw">Extension</span></td><td style="color:var(--text3);font-size:11.5px">May 9 '25</td></tr>
+                <tr class="empty-row" style="display:none"><td colspan="5">No EOI for selected rep</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- CATE EOI -->
+        <div>
+          <div class="sh">Cate Steigerwald — top unbilled EOI deals</div>
+          <div class="tw">
+            <table>
+              <colgroup><col style="width:22%"><col style="width:44%"><col style="width:12%"><col style="width:11%"><col style="width:11%"></colgroup>
+              <thead><tr><th>Account</th><th>Deal</th><th>Amount</th><th>Type</th><th>End Date</th></tr></thead>
+              <tbody id="eoi-cate">
+                <tr data-rep="cate"><td><strong>BofA</strong></td><td>BofA — M&amp;A — Project Ignite</td><td style="font-weight:600;color:var(--amber)">$154,628</td><td><span class="pill pg">Incremental</span></td><td style="color:var(--text3);font-size:11.5px">Apr 4 '27</td></tr>
+                <tr data-rep="cate"><td><strong>BofA</strong></td><td>BofA — FIG — Project CAP</td><td style="font-weight:600;color:var(--amber)">$62,111</td><td><span class="pill pw">Extension</span></td><td style="color:var(--text3);font-size:11.5px">Sep 28 '25</td></tr>
+                <tr data-rep="cate"><td><strong>BofA</strong></td><td>BofA — M&amp;A — Project Fly VDR</td><td style="font-weight:600;color:var(--amber)">$53,099</td><td><span class="pill pg">Incremental</span></td><td style="color:var(--text3);font-size:11.5px">Aug 18 '26</td></tr>
+                <tr data-rep="cate"><td><strong>Morgan Stanley</strong></td><td>MS — M&amp;A / C&amp;R — Project Safari VDR</td><td style="font-weight:600;color:var(--amber)">$28,611</td><td><span class="pill pw">Extension</span></td><td style="color:var(--text3);font-size:11.5px">Dec 23 '25</td></tr>
+                <tr data-rep="cate"><td><strong>Morgan Stanley</strong></td><td>MS — M&amp;A — Project Rise DCAI</td><td style="font-weight:600;color:var(--amber)">$28,433</td><td><span class="pill pg">Incremental</span></td><td style="color:var(--text3);font-size:11.5px">Oct 6 '26</td></tr>
+                <tr data-rep="cate"><td><strong>BofA</strong></td><td>BofA — EGRC/GIG — Project Alligator</td><td style="font-weight:600;color:var(--amber)">$26,952</td><td><span class="pill pw">Extension</span></td><td style="color:var(--text3);font-size:11.5px">Sep 21 '26</td></tr>
+                <tr data-rep="cate"><td><strong>Morgan Stanley</strong></td><td>MS — GPUG — Project Gambit</td><td style="font-weight:600;color:var(--amber)">$22,048</td><td><span class="pill pg">Incremental</span></td><td style="color:var(--text3);font-size:11.5px">Feb 1 '27</td></tr>
+                <tr data-rep="cate"><td><strong>BofA</strong></td><td>BofA — M&amp;A/Tech — Project Salus VDR</td><td style="font-weight:600;color:var(--amber)">$14,283</td><td><span class="pill pg">Incremental</span></td><td style="color:var(--text3);font-size:11.5px">Jun 12 '26</td></tr>
+                <tr data-rep="cate"><td><strong>Morgan Stanley</strong></td><td>MS — FIG — Project Marley 2.0</td><td style="font-weight:600;color:var(--amber)">$13,534</td><td><span class="pill pw">Extension</span></td><td style="color:var(--text3);font-size:11.5px">Aug 19 '26</td></tr>
+                <tr data-rep="cate"><td><strong>BofA</strong></td><td>BofA — M&amp;A — Project Alaska VDR</td><td style="font-weight:600;color:var(--amber)">$10,057</td><td><span class="pill pg">Incremental</span></td><td style="color:var(--text3);font-size:11.5px">Nov 13 '26</td></tr>
+                <tr class="empty-row" style="display:none"><td colspan="5">No EOI for selected rep</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- JULIA EOI -->
+        <div>
+          <div class="sh">Julia Kubie — top unbilled EOI deals</div>
+          <div class="tw">
+            <table>
+              <colgroup><col style="width:22%"><col style="width:44%"><col style="width:12%"><col style="width:11%"><col style="width:11%"></colgroup>
+              <thead><tr><th>Account</th><th>Deal</th><th>Amount</th><th>Type</th><th>End Date</th></tr></thead>
+              <tbody id="eoi-julia">
+                <tr data-rep="julia"><td><strong>Alvarez &amp; Marsal</strong></td><td>RX — Project Rise — DealCentre</td><td style="font-weight:600;color:var(--amber)">$126,000</td><td><span class="pill pw">Extension</span></td><td style="color:var(--text3);font-size:11.5px">Apr 3 '26</td></tr>
+                <tr data-rep="julia"><td><strong>Vestra Advisors</strong></td><td>Real Estate — Project Union — DealCentre</td><td style="font-weight:600;color:var(--amber)">$33,755</td><td><span class="pill pw">Extension</span></td><td style="color:var(--text3);font-size:11.5px">Nov 28 '25</td></tr>
+                <tr data-rep="julia"><td><strong>FT Partners</strong></td><td>Fintech — Project Sapphire — DealCentre</td><td style="font-weight:600;color:var(--amber)">$30,000</td><td><span class="pill pw">Extension</span></td><td style="color:var(--text3);font-size:11.5px">Feb 22 '26</td></tr>
+                <tr data-rep="julia"><td><strong>Stephens Inc.</strong></td><td>FIG — Project Ascent</td><td style="font-weight:600;color:var(--amber)">$21,493</td><td><span class="pill pw">Extension</span></td><td style="color:var(--text3);font-size:11.5px">Jul 17 '26</td></tr>
+                <tr data-rep="julia"><td><strong>Fairmount Partners</strong></td><td>Project A1A Relaunch — DealCentre</td><td style="font-weight:600;color:var(--amber)">$12,343</td><td><span class="pill pw">Extension</span></td><td style="color:var(--text3);font-size:11.5px">Apr 22 '26</td></tr>
+                <tr data-rep="julia"><td><strong>Fairmount Partners</strong></td><td>HC — Project Blonde — DealCentre</td><td style="font-weight:600;color:var(--amber)">$5,000</td><td><span class="pill pw">Extension</span></td><td style="color:var(--text3);font-size:11.5px">Apr 12 '25</td></tr>
+                <tr data-rep="julia"><td><strong>Alvarez &amp; Marsal</strong></td><td>RX — Project Makeup — DealCentre</td><td style="font-weight:600;color:var(--amber)">$3,750</td><td><span class="pill pw">Extension</span></td><td style="color:var(--text3);font-size:11.5px">Mar 11 '26</td></tr>
+                <tr data-rep="julia"><td><strong>Fairmount Partners</strong></td><td>Fairmount — Project Phoenix 2</td><td style="font-weight:600;color:var(--amber)">$3,000</td><td><span class="pill pw">Extension</span></td><td style="color:var(--text3);font-size:11.5px">Apr 23 '26</td></tr>
+                <tr class="empty-row" style="display:none"><td colspan="5">No EOI for selected rep</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- SHANNON EOI -->
+        <div>
+          <div class="sh">Shannon Mckenna — top unbilled EOI deals</div>
+          <div class="tw">
+            <table>
+              <colgroup><col style="width:22%"><col style="width:44%"><col style="width:12%"><col style="width:11%"><col style="width:11%"></colgroup>
+              <thead><tr><th>Account</th><th>Deal</th><th>Amount</th><th>Type</th><th>End Date</th></tr></thead>
+              <tbody id="eoi-shannon">
+                <tr data-rep="shannon"><td><strong>Davis Polk</strong></td><td>LAW — Project Rise VDR</td><td style="font-weight:600;color:var(--amber)">$6,017</td><td><span class="pill pw">Extension</span></td><td style="color:var(--text3);font-size:11.5px">Feb 27 '26</td></tr>
+                <tr data-rep="shannon"><td><strong>Broadhaven Capital</strong></td><td>Project Agora — DealCentre VDR</td><td style="font-weight:600;color:var(--amber)">$3,758</td><td><span class="pill pg">Incremental</span></td><td style="color:var(--text3);font-size:11.5px">Sep 4 '26</td></tr>
+                <tr data-rep="shannon"><td><strong>Ducera Partners</strong></td><td>Project Springfield — Transfer VDR</td><td style="font-weight:600;color:var(--amber)">$2,232</td><td><span class="pill pg">Incremental</span></td><td style="color:var(--text3);font-size:11.5px">Jul 4 '26</td></tr>
+                <tr data-rep="shannon"><td><strong>Drake Star Partners</strong></td><td>Tech — Project Athena — DealCentre</td><td style="font-weight:600;color:var(--amber)">$2,200</td><td><span class="pill pw">Extension</span></td><td style="color:var(--text3);font-size:11.5px">Dec 19 '25</td></tr>
+                <tr data-rep="shannon"><td><strong>Berkshire Global</strong></td><td>FinServices — Project Vita II — DealCentre</td><td style="font-weight:600;color:var(--amber)">$2,064</td><td><span class="pill pw">Extension</span></td><td style="color:var(--text3);font-size:11.5px">Dec 9 '25</td></tr>
+                <tr data-rep="shannon"><td><strong>Berkshire Global</strong></td><td>FinServices — Project Lennox — DealCentre</td><td style="font-weight:600;color:var(--amber)">$2,000</td><td><span class="pill pw">Extension</span></td><td style="color:var(--text3);font-size:11.5px">Jan 27 '26</td></tr>
+                <tr data-rep="shannon"><td><strong>Berkshire Global</strong></td><td>FinServices — Project Potomac VDR</td><td style="font-weight:600;color:var(--amber)">$1,900</td><td><span class="pill pw">Extension</span></td><td style="color:var(--text3);font-size:11.5px">Nov 8 '24</td></tr>
+                <tr class="empty-row" style="display:none"><td colspan="5">No EOI for selected rep</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="info-box"><strong>EOI (Extension of Investment)</strong> accrues when a deal runs past its contracted term or exceeds base fee thresholds. Unbilled EOI is recognized revenue that has not yet been invoiced. Totals shown are deduplicated unique line items per rep (5/4/2026 report).</div>
+      </div>
+
+      <!-- DEAL PREP -->
+      <div class="view" id="view-dealprep">
+        <div class="tw">
+          <table>
+            <colgroup><col style="width:10%"><col style="width:15%"><col style="width:27%"><col style="width:22%"><col style="width:11%"><col style="width:15%"></colgroup>
+            <thead><tr><th>Rep</th><th>Account</th><th>Exchange name</th><th>Adj. pages</th><th>Users</th><th>Last access</th></tr></thead>
+            <tbody id="dp-body">
+              <tr data-rep="cate"><td style="color:#534AB7;font-weight:600">Cate</td><td><strong>Nomura GT</strong></td><td>Project Lafayette - Staging</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:100%;background:#534AB7"></div></div><span style="font-weight:600">24.1M</span></div></td><td>75</td><td style="color:var(--text3);font-size:11.5px">2026-05-03</td></tr>
+              <tr data-rep="cate"><td style="color:#534AB7;font-weight:600">Cate</td><td><strong>Morgan Stanley</strong></td><td>Project Burgundy - Staging</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:21%;background:#534AB7"></div></div><span style="font-weight:600">5.1M</span></div></td><td>89</td><td style="color:var(--text3);font-size:11.5px">2026-04-08</td></tr>
+              <tr data-rep="cole"><td style="color:#0F6E56;font-weight:600">Sarah</td><td><strong>Wells Fargo</strong></td><td>Project Paris Staging Room</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:18%;background:#0F6E56"></div></div><span style="font-weight:600">4.3M</span></div></td><td>38</td><td style="color:var(--text3);font-size:11.5px">2026-03-20</td></tr>
+              <tr data-rep="cate"><td style="color:#534AB7;font-weight:600">Cate</td><td><strong>BofA</strong></td><td>Project Gaviota - Staging</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:15%;background:#534AB7"></div></div><span style="font-weight:600">3.5M</span></div></td><td>4</td><td style="color:var(--text3);font-size:11.5px">2026-03-24</td></tr>
+              <tr data-rep="cole"><td style="color:#0F6E56;font-weight:600">Sarah</td><td><strong>Wells Fargo Bank</strong></td><td>Project Chateauneuf DTE</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:13%;background:#0F6E56"></div></div><span style="font-weight:600">3.2M</span></div></td><td>40</td><td style="color:var(--text3);font-size:11.5px">2026-05-01</td></tr>
+              <tr data-rep="cate"><td style="color:#534AB7;font-weight:600">Cate</td><td><strong>Morgan Stanley</strong></td><td>Project Elevate - Staging</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:10%;background:#534AB7"></div></div><span style="font-weight:600">2.5M</span></div></td><td>81</td><td style="color:var(--text3);font-size:11.5px">2025-11-03</td></tr>
+              <tr data-rep="cate"><td style="color:#534AB7;font-weight:600">Cate</td><td><strong>BofA</strong></td><td>Project Phoenix – DTE</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:8%;background:#534AB7"></div></div><span style="font-weight:600">2.0M</span></div></td><td>77</td><td style="color:var(--text3);font-size:11.5px">2026-04-09</td></tr>
+              <tr data-rep="cate"><td style="color:#534AB7;font-weight:600">Cate</td><td><strong>BofA</strong></td><td>Project Acadia - Staging</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:6%;background:#534AB7"></div></div><span style="font-weight:600">1.5M</span></div></td><td>88</td><td style="color:var(--text3);font-size:11.5px">2026-04-08</td></tr>
+              <tr data-rep="julia"><td style="color:#993C1D;font-weight:600">Julia</td><td><strong>FT Partners</strong></td><td>Project Ivey Staging</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:3%;background:#993C1D"></div></div><span style="font-weight:600">816K</span></div></td><td>12</td><td style="color:var(--text3);font-size:11.5px">2025-12-09</td></tr>
+              <tr data-rep="cole"><td style="color:#0F6E56;font-weight:600">Sarah</td><td><strong>Wells Fargo</strong></td><td>Project Catamaran Prep</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:2.6%;background:#0F6E56"></div></div><span style="font-weight:600">624K</span></div></td><td>52</td><td style="color:var(--text3);font-size:11.5px">2026-04-24</td></tr>
+              <tr data-rep="cole"><td style="color:#0F6E56;font-weight:600">Sarah</td><td><strong>Wells Fargo</strong></td><td>Project Falcon Prep</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:2.3%;background:#0F6E56"></div></div><span style="font-weight:600">560K</span></div></td><td>71</td><td style="color:var(--text3);font-size:11.5px">2026-03-23</td></tr>
+              <tr data-rep="shannon"><td style="color:#185FA5;font-weight:600">Shannon</td><td><strong>Drake Star</strong></td><td>Project Summit Prep Room</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:2.2%;background:#185FA5"></div></div><span style="font-weight:600">525K</span></div></td><td>14</td><td style="color:var(--text3);font-size:11.5px">2026-03-16</td></tr>
+              <tr data-rep="shannon"><td style="color:#185FA5;font-weight:600">Shannon</td><td><strong>Cantor Fitz</strong></td><td>Project Mammoth Prep Room</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:0.9%;background:#185FA5"></div></div><span style="font-weight:600">215K</span></div></td><td>19</td><td style="color:var(--text3);font-size:11.5px">2026-04-15</td></tr>
+              <tr class="empty-row" style="display:none"><td colspan="6">No deal prep data for selected rep</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- EXTENSIONS -->
+      <div class="view" id="view-ext">
+        <div class="tw">
+          <table>
+            <colgroup><col style="width:10%"><col style="width:14%"><col style="width:30%"><col style="width:12%"><col style="width:11%"><col style="width:23%"></colgroup>
+            <thead><tr><th>Rep</th><th>Account</th><th>Opportunity</th><th>Ext. date</th><th>HWM</th><th>1st ext. fee</th></tr></thead>
+            <tbody id="ext-body">
+              <tr data-rep="cole"><td style="color:#0F6E56;font-weight:600">Sarah</td><td><strong>Citigroup</strong></td><td>Citi M&amp;A Project Zenith VDR</td><td style="color:var(--text3);font-size:12px">2026-05-10</td><td style="color:var(--text3)">1,041,630</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:100%;background:#0F6E56"></div></div><span style="font-weight:600">$249,991</span></div></td></tr>
+              <tr data-rep="cate"><td style="color:#534AB7;font-weight:600">Cate</td><td><strong>BofA</strong></td><td>BofA M&amp;A Project Acadia Amendment</td><td style="color:var(--text3);font-size:12px">2026-07-01</td><td style="color:var(--text3)">987,334</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:87%;background:#534AB7"></div></div><span style="font-weight:600">$217,213</span></div></td></tr>
+              <tr data-rep="cate"><td style="color:#534AB7;font-weight:600">Cate</td><td><strong>BofA</strong></td><td>BofA REGL Project Redwood VDR</td><td style="color:var(--text3);font-size:12px">2026-06-30</td><td style="color:var(--text3)">472,859</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:47%;background:#534AB7"></div></div><span style="font-weight:600">$118,215</span></div></td></tr>
+              <tr data-rep="cate"><td style="color:#534AB7;font-weight:600">Cate</td><td><strong>BofA</strong></td><td>BofA M&amp;A Project Ignite</td><td style="color:var(--text3);font-size:12px">2026-10-10</td><td style="color:var(--text3)">367,210</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:34%;background:#534AB7"></div></div><span style="font-weight:600">$84,458</span></div></td></tr>
+              <tr data-rep="cate"><td style="color:#534AB7;font-weight:600">Cate</td><td><strong>NGT</strong></td><td>NGT Project Lafayette</td><td style="color:var(--text3);font-size:12px">2026-10-03</td><td style="color:var(--text3)">354,844</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:31%;background:#534AB7"></div></div><span style="font-weight:600">$76,800</span></div></td></tr>
+              <tr data-rep="cate"><td style="color:#534AB7;font-weight:600">Cate</td><td><strong>Morgan Stanley</strong></td><td>MS M&amp;A Project Burgundy</td><td style="color:var(--text3);font-size:12px">2026-06-23</td><td style="color:var(--text3)">279,567</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:25%;background:#534AB7"></div></div><span style="font-weight:600">$61,505</span></div></td></tr>
+              <tr data-rep="cole"><td style="color:#0F6E56;font-weight:600">Sarah</td><td><strong>Citigroup</strong></td><td>Citi HC Project Ruby VDR</td><td style="color:var(--text3);font-size:12px">2026-10-27</td><td style="color:var(--text3)">238,026</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:24%;background:#0F6E56"></div></div><span style="font-weight:600">$59,507</span></div></td></tr>
+              <tr data-rep="cate"><td style="color:#534AB7;font-weight:600">Cate</td><td><strong>BofA</strong></td><td>BofA M&amp;A Project Fly VDR</td><td style="color:var(--text3);font-size:12px">2026-09-07</td><td style="color:var(--text3)">221,999</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:22%;background:#534AB7"></div></div><span style="font-weight:600">$56,232</span></div></td></tr>
+              <tr data-rep="shannon"><td style="color:#185FA5;font-weight:600">Shannon</td><td><strong>Ducera</strong></td><td>Ducera Project Springfield</td><td style="color:var(--text3);font-size:12px">2026-07-05</td><td style="color:var(--text3)">298,771</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:26%;background:#185FA5"></div></div><span style="font-weight:600">$65,730</span></div></td></tr>
+              <tr data-rep="cole"><td style="color:#0F6E56;font-weight:600">Sarah</td><td><strong>Citigroup</strong></td><td>Citi M&amp;A Project Longhorn VDR</td><td style="color:var(--text3);font-size:12px">2026-06-03</td><td style="color:var(--text3)">117,551</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:12%;background:#0F6E56"></div></div><span style="font-weight:600">$29,388</span></div></td></tr>
+              <tr data-rep="julia"><td style="color:#993C1D;font-weight:600">Julia</td><td><strong>FT Partners</strong></td><td>Project Burtonwood VDR Amendment</td><td style="color:var(--text3);font-size:12px">2026-06-30</td><td style="color:var(--text3)">129,156</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:12%;background:#993C1D"></div></div><span style="font-weight:600">$30,800</span></div></td></tr>
+              <tr data-rep="cole"><td style="color:#0F6E56;font-weight:600">Sarah</td><td><strong>Citigroup</strong></td><td>Citi CET Project North Star</td><td style="color:var(--text3);font-size:12px">2026-07-18</td><td style="color:var(--text3)">53,995</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:10%;background:#0F6E56"></div></div><span style="font-weight:600">$25,000</span></div></td></tr>
+              <tr data-rep="cole"><td style="color:#0F6E56;font-weight:600">Sarah</td><td><strong>Barclays</strong></td><td>Barclays Power Project Zephyr VDR</td><td style="color:var(--text3);font-size:12px">2026-09-01</td><td style="color:var(--text3)">109,842</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:11%;background:#0F6E56"></div></div><span style="font-weight:600">$26,407</span></div></td></tr>
+              <tr data-rep="julia"><td style="color:#993C1D;font-weight:600">Julia</td><td><strong>FT Partners</strong></td><td>Fintech Project Ivey Amendment</td><td style="color:var(--text3);font-size:12px">2026-07-06</td><td style="color:var(--text3)">35,860</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:3%;background:#993C1D"></div></div><span style="font-weight:600">$8,280</span></div></td></tr>
+              <tr class="empty-row" style="display:none"><td colspan="6">No extensions for selected rep</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ALERTS -->
+      <div class="view" id="view-alerts">
+        <div class="alerts-list" id="al-body">
+          <div class="alert-item h" data-rep="cole"><span class="adot" style="background:var(--red)"></span><div class="alert-text"><strong>Sarah — $556K total unbilled EOI.</strong> 33 line items across Barclays and Citigroup. Largest single item: Barclays Project Prompt ($195K), end Aug 27, 2026. Invoice status not confirmed in Salesforce.</div></div>
+          <div class="alert-item h" data-rep="cate"><span class="adot" style="background:var(--red)"></span><div class="alert-text"><strong>Cate — $454K total unbilled EOI.</strong> 39 line items across BofA and Morgan Stanley. Largest: BofA M&amp;A Project Ignite ($155K incremental) and BofA FIG Project CAP ($62K).</div></div>
+          <div class="alert-item h" data-rep="julia"><span class="adot" style="background:var(--red)"></span><div class="alert-text"><strong>Julia — $239K total unbilled EOI.</strong> 17 line items. Largest: A&amp;M RX Project Rise ($126K extension, end Apr 3 '26) and Vestra Project Union ($34K).</div></div>
+          <div class="alert-item h" data-rep="cole"><span class="adot" style="background:var(--red)"></span><div class="alert-text"><strong>Sarah — Citi Project Zenith 1st Extension · $249,991 fee.</strong> Extension date 5/10 — largest 1st extension on the team.</div></div>
+          <div class="alert-item h" data-rep="shannon"><span class="adot" style="background:var(--red)"></span><div class="alert-text"><strong>Shannon — 16 deals with May close dates.</strong> Two largest on hold: Cantor Canon ($40K) and Berkshire Lodestar ($39K).</div></div>
+          <div class="alert-item h" data-rep="cole"><span class="adot" style="background:var(--red)"></span><div class="alert-text"><strong>Sarah — Barclays Emerald · $72K · closes 5/31.</strong> No SF update in 7 days. Last logged: 4/29.</div></div>
+          <div class="alert-item h" data-rep="cole"><span class="adot" style="background:var(--red)"></span><div class="alert-text"><strong>Cole — Citi Project Trident · $50K · closes 5/31.</strong> Still in Propose. 508 pages in prep room. Last SF update: 4/28.</div></div>
+          <div class="alert-item m" data-rep="cate"><span class="adot" style="background:var(--amber)"></span><div class="alert-text"><strong>Cate — MS Project Michelin · duplicate opp.</strong> Two open opportunities at $40K each — one VDR, one DealCentre. Platform not yet selected.</div></div>
+          <div class="alert-item m" data-rep="cate"><span class="adot" style="background:var(--amber)"></span><div class="alert-text"><strong>Cate/Carmel — MS GPUG Project Beacon · $41K · closes 5/31.</strong> In Propose. Last update logged 4/30.</div></div>
+          <div class="alert-item m" data-rep="julia"><span class="adot" style="background:var(--amber)"></span><div class="alert-text"><strong>Julia — 3 Contract Signed opps · $47.3K combined.</strong> DC Advisory Apple ($28K), Long Beach ($10.5K), Skylark ($8.8K) — all with May close dates.</div></div>
+          <div class="no-data" id="al-empty">No alerts for selected rep.</div>
+        </div>
+      </div>
+
+    </div>
+    <div class="footer">Team Hoffman · Intralinks AE · Pipeline 5/26/2026 · EOI 5/4/2026 · Internal use only</div>
+  </div>
+</div>
+
+<script>
+const REP_LABELS={all:"All reps",cate:"Cate & Carmel",cole:"Cole & Sarah",shannon:"Shannon",julia:"Julia"};
+const REP_COLORS={cate:"#534AB7",cole:"#0F6E56",shannon:"#185FA5",julia:"#993C1D"};
+const TBODY_IDS=["ov-table","pl-body","dp-body","ext-body","eoi-sarah","eoi-cate","eoi-julia","eoi-shannon"];
+let curRep="all";
+
+// Rep data lookup
+const REP_DATA = {
+  all:     {pipeline:"$1.27M", eoi:"$1.28M", deals:97, ext:59},
+  cate:    {pipeline:"$631K",  eoi:"$454K",  deals:37, ext:22},
+  cole:    {pipeline:"$337K",  eoi:"$556K",  deals:25, ext:27},
+  shannon: {pipeline:"$176K",  eoi:"$28K",   deals:20, ext:7},
+  julia:   {pipeline:"$129K",  eoi:"$239K",  deals:15, ext:3},
+};
+
+const EOI_DATA = {
+  cate:    {total:"$454,271", ext:"$285,048", incr:"$169,223", deals:"39 line items · BofA & MS"},
+  cole:    {total:"$556,057", ext:"$473,819", incr:"$82,238",  deals:"33 line items · Barclays & Citi"},
+  shannon: {total:"$28,465",  ext:"$22,397",  incr:"$6,068",   deals:"26 line items · Davis Polk & Berkshire"},
+  julia:   {total:"$238,599", ext:"$235,021", incr:"$3,578",   deals:"17 line items · A&M & Vestra"},
+};
+
+// Pipeline data per rep for dynamic stats
+const PL_DATA = {
+  cate:    {total:"$631,250", deals:14, close:4, risk:4, avg:"$45,089"},
+  cole:    {total:"$337,000", deals:10, close:4, risk:5, avg:"$33,700"},
+  shannon: {total:"$176,437", deals:8,  close:6, risk:4, avg:"$22,055"},
+  julia:   {total:"$129,050", deals:11, close:6, risk:3, avg:"$11,732"},
+};
+
+function fmtDollar(n){
+  if(n>=1000000) return "$"+(n/1000000).toFixed(2)+"M";
+  if(n>=1000) return "$"+(n/1000).toFixed(0)+"K";
+  return "$"+n.toLocaleString();
+}
+
+function updateSummaryStrip(){
+  const strip = document.getElementById("rep-summary-strip");
+  if(curRep === "all"){
+    strip.style.display = "none";
+    return;
+  }
+  strip.style.display = "flex";
+  const c = REP_COLORS[curRep];
+  const d = REP_DATA[curRep];
+  document.getElementById("strip-rep").textContent = REP_LABELS[curRep];
+  document.getElementById("strip-rep").style.color = c;
+  document.getElementById("strip-pipeline").textContent = d.pipeline;
+  document.getElementById("strip-eoi").textContent = d.eoi;
+  document.getElementById("strip-deals").textContent = d.deals + " deals";
+  document.getElementById("strip-ext").textContent = d.ext + " extensions";
+  // Tint the strip with rep color
+  strip.style.background = c + "0d";
+  strip.style.borderBottomColor = c + "33";
+  strip.querySelectorAll("span[style*='color:#92400e']").forEach(el => el.style.color = c);
+}
+
+function updatePipelineMetrics(){
+  const metrics = document.getElementById("pl-metrics");
+  if(curRep === "all"){
+    metrics.style.display = "none";
+    return;
+  }
+  metrics.style.display = "grid";
+  const d = PL_DATA[curRep];
+  const repColor = REP_COLORS[curRep];
+  document.getElementById("pl-total").textContent = d.total;
+  document.getElementById("pl-total").style.color = repColor;
+  document.getElementById("pl-deals-sub").textContent = d.deals + " visible deals";
+  document.getElementById("pl-close").textContent = d.close;
+  document.getElementById("pl-risk").textContent = d.risk;
+  document.getElementById("pl-avg").textContent = d.avg;
+}
+
+function updateEOIMetrics(){
+  const allMetrics = document.getElementById("eoi-all-metrics");
+  const repMetrics = document.getElementById("eoi-rep-metrics");
+  if(curRep === "all"){
+    allMetrics.style.display = "grid";
+    repMetrics.style.display = "none";
+    return;
+  }
+  allMetrics.style.display = "none";
+  const d = EOI_DATA[curRep];
+  if(!d){ repMetrics.style.display = "none"; return; }
+  repMetrics.style.display = "grid";
+  const c = REP_COLORS[curRep];
+  document.getElementById("eoi-rep-label").textContent = REP_LABELS[curRep] + " — unbilled EOI";
+  document.getElementById("eoi-rep-total").textContent = d.total;
+  document.getElementById("eoi-rep-total").style.color = c;
+  document.getElementById("eoi-rep-sub").textContent = d.deals;
+  document.getElementById("eoi-ext-total").textContent = d.ext;
+  document.getElementById("eoi-ext-total").style.color = c;
+  document.getElementById("eoi-incr-total").textContent = d.incr;
+  document.getElementById("eoi-incr-total").style.color = c;
+}
+
+function applyFilter(){
+  TBODY_IDS.forEach(id=>{
+    const tb=document.getElementById(id);
+    if(!tb)return;
+    let vis=0;
+    tb.querySelectorAll("tr[data-rep]").forEach(row=>{
+      const show=curRep==="all"||row.dataset.rep===curRep;
+      row.classList.toggle("hr",!show);
+      if(show)vis++;
+    });
+    const empty=tb.querySelector(".empty-row");
+    if(empty)empty.style.display=vis===0?"":"none";
+  });
+  ["al-body","ov-flags"].forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    let vis=0;
+    el.querySelectorAll("[data-rep]").forEach(item=>{
+      const show=curRep==="all"||item.dataset.rep===curRep;
+      item.style.display=show?"":"none";
+      if(show)vis++;
+    });
+    const nd=el.querySelector(".no-data");
+    if(nd)nd.style.display=vis===0?"":"none";
+  });
+  let ac=0;
+  document.querySelectorAll("#al-body [data-rep]").forEach(el=>{
+    if(curRep==="all"||el.dataset.rep===curRep)ac++;
+  });
+  ["sb-badge","topnav-badge"].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=ac;});
+  const pill=document.getElementById("rep-pill");
+  const meta=document.getElementById("pmeta");
+  if(curRep==="all"){
+    pill.style.display="none";
+    meta.textContent="All reps · Salesforce export 5/26/2026";
+  } else {
+    const c=REP_COLORS[curRep];
+    pill.style.display="inline-flex";
+    pill.style.background=c+"18";pill.style.color=c;pill.style.border="1px solid "+c+"44";
+    pill.innerHTML=`<span style="width:6px;height:6px;border-radius:50%;background:${c};display:inline-block"></span>${REP_LABELS[curRep]}`;
+    meta.textContent=REP_LABELS[curRep]+" · Salesforce export 5/26/2026";
+  }
+  updateSummaryStrip();
+  updatePipelineMetrics();
+  updateEOIMetrics();
+  updateQuotaCards();
+}
+
+function updateQuotaCards(){
+  const grid = document.getElementById("quota-rep-grid");
+  if(!grid) return;
+  grid.querySelectorAll(".quota-card[data-quota-rep]").forEach(card => {
+    const r = card.dataset.quotaRep;
+    card.style.display = (curRep === "all" || r === curRep) ? "" : "none";
+  });
+  // If single rep, make grid full width single column
+  if(curRep !== "all"){
+    grid.style.gridTemplateColumns = "1fr";
+  } else {
+    grid.style.gridTemplateColumns = "repeat(2,1fr)";
+  }
+}
+
+function switchView(v){
+  document.querySelectorAll(".view").forEach(el=>el.classList.remove("on"));
+  document.getElementById("view-"+v).classList.add("on");
+  document.querySelectorAll(".sb-btn[data-view]").forEach(btn=>btn.classList.toggle("on",btn.dataset.view===v));
+  const titles={overview:"Team overview",pipeline:"Pipeline",eoi:"Unbilled EOI",dealprep:"Deal prep usage",ext:"1st extensions",alerts:"Alerts",quota:"Quota Tracker"};
+  document.getElementById("ptitle").textContent=titles[v]||v;
+  applyFilter();
+}
+
+function switchRep(rep){
+  curRep=rep;
+  document.querySelectorAll(".rep-btn").forEach(btn=>btn.classList.toggle("on",btn.dataset.rep===rep));
+  applyFilter();
+}
+
+document.querySelectorAll(".sb-btn[data-view]").forEach(btn=>btn.addEventListener("click",()=>switchView(btn.dataset.view)));
+document.querySelectorAll(".rep-btn[data-rep]").forEach(btn=>btn.addEventListener("click",()=>switchRep(btn.dataset.rep)));
+</script>
+</body>
+</html>
